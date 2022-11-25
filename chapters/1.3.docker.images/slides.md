@@ -34,7 +34,6 @@ In this lesson, we will explain:
 * What is an image.
 * What is a layer.
 * The various image namespaces.
-* How to search and download images.
 * Image tags and when to use them.
 
 
@@ -100,31 +99,6 @@ If an image is read-only, how do we change it?
 
 ---
 
-# A chicken-and-egg problem
-
-* The only way to create an image is by "freezing" a container.
-* The only way to create a container is by instanciating an image.
-* Help!
-
-
----
-
-# Creating the first images
-
-There is a special empty image called `scratch`.
-
-* It allows to *build from scratch*.
-
-The `docker import` command loads a tarball into Docker.
-
-* The imported tarball becomes a standalone image.
-* That new image has a single layer.
-
-Note: you will probably never have to do this yourself.
-
-
----
-
 # Creating other images
 
 `docker commit`
@@ -159,63 +133,6 @@ There are three namespaces:
     e.g. `registry.example.com:5000/my-private/image`
 
 Let's explain each of them.
-
-
----
-
-# Root namespace
-
-The root namespace is for official images. They are put there by Docker Inc.,
-but they are generally authored and maintained by third parties.
-
-Those images include:
-
-* Small, "swiss-army-knife" images like busybox.
-* Distro images to be used as bases for your builds, like ubuntu, fedora...
-* Ready-to-use components and services, like redis, postgresql...
-
-
-
----
-
-# User namespace
-
-The user namespace holds images for Docker Hub users and organizations.
-
-* For example:
-
-    ```shell
-    jpetazzo/clock
-    ```
-
-* The Docker Hub user is:
-
-    ```shell
-    jpetazzo
-    ```
-
-* The image name is:
-
-    ```shell
-    clock
-    ```
-
----
-
-# Self-Hosted namespace
-
-* This namespace holds images which are not hosted on Docker Hub, but on third party registries.
-
-* They contain the hostname (or IP address), and optionally the port, of the registry server.
-
-* For example:
-
-    ```shell
-    localhost:5000/wordpress
-    ```
-
-* `localhost:5000` is the host and port of the registry
-* `wordpress` is the name of the image
 
 
 ---
@@ -256,92 +173,9 @@ to push and pull images to and from a registry.
 
 ---
 
-# Searching for images
-
-* We cannot list *all* images on a remote registry, but
-we can search for a specific keyword:
-
-    ```shell
-    $ docker search zookeeper
-    NAME                  DESCRIPTION                 STARS  OFFICIAL  AUTOMATED
-    jplock/zookeeper      Builds a docker image ...   103              [OK]
-    mesoscloud/zookeeper  ZooKeeper                   42               [OK]
-    springxd/zookeeper    A Docker image that ca...   5                [OK]
-    elevy/zookeeper       ZooKeeper configured t...   3                [OK]
-    ```
-
-* "Stars" indicate the popularity of the image.
-* "Official" images are those in the root namespace.
-* "Automated" images are built automatically by the Docker Hub.
-  <br/>(This means that their build recipe is always available.)
-
-
----
-
-
-# Downloading images
-
-There are two ways to download images.
-
-* Explicitly, with `docker pull`.
-* Implicitly, when executing `docker run` and the image is not found locally.
-
-
----
-
-
-# Pulling an image
-
-* To pull an image do:
-
-    ```shell
-    $ docker pull alpine:3.5
-    3.5: Pulling from library/alpine
-    0a8490d0dfd3: Pull complete
-    Digest: sha256:dfbd4a3a8ebca874ebd2474f044a0b33600d4523d03b0df76e5c5986cb02d7e8
-    Status: Downloaded newer image for alpine:3.5
-
-* As seen previously, images are made up of layers.
-* Docker has downloaded all the necessary layers.
-* In this example, `:3.5` indicates which exact version of Alpine
-  we would like. It is a *version tag*.
-* Alpine is a really small Operating System (~2Mb!), perfect for containers
-
-
----
-
 # Image and tags
 
 * Images can have tags.
 * Tags define image versions or variants.
 * `docker pull ubuntu` will refer to `ubuntu:latest`.
 * The `:latest` tag is generally updated often.
-
-
----
-
-# When to (not) use tags
-
-Dont specify tags:
-
-* When doing rapid testing and prototyping.
-* When experimenting.
-* When you want the latest version.
-
-Do specify tags:
-
-* When recording a procedure into a script.
-* When going to production.
-* To ensure that the same version will be used everywhere.
-* To ensure repeatability later.
-
-
----
-
-# Section summary
-
-We've learned how to:
-
-* Understand images and layers.
-* Understand Docker image namespacing.
-* Search and download images.

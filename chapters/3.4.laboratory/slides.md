@@ -21,22 +21,21 @@ drawings:
   persist: true
 ---
 
-# Build and Run Guestbook App
+# Build and Run Guestbook
 
 We want to build and run a Guestbook App that uses Redis as backend.
 
 * Clone this git repo:
 
     ```shell
-    git clone https://github.com/spiddy/training
+    git clone https://github.com/dkapanidis/training
     ```
 
 ::right::
 
 **Steps**
 
-* In directory `docker/101/guestbook-node` build the Dockerfile as `guestbook` image
-* Create a network `guestbook`
-* Create a `redis:alpine` instance in `guestbook` network
-* Create a `guestbook` instance in `guestbook` network and expose port `3000`
-* Don't use `docker-compose` for this example!
+* Go to `docker/101/guestbook-node`.
+* Run `docker compose up -d`.
+* Run `docker compose ps` to get the port.
+* Open port to see the guestbook running.

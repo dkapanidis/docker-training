@@ -100,8 +100,6 @@ Notes:
   * `-i` tells Docker to connect us to the container's stdin.
   * `-t` tells Docker that we want a pseudo-terminal.
 
-**NOTE**: If you're using Windows, open a `PowerShell` but not `PowerShell ISE`, it seems to have some issues capturing input.
-
 ---
 
 # Do something in our container
@@ -114,22 +112,6 @@ Notes:
     ```
 
 Alright, we need to install it.
-
----
-
-# An observation
-
-* Let's check how many packages are installed here.
-
-    ```shell
-    root@4f9263507465:/# dpkg -l | wc -l
-    189
-    ```
-
-* `dpkg -l` lists the packages installed in our container
-* `wc -l` counts them
-* If you have a Debian or Ubuntu machine, you can run the same command
-  and compare the results.
 
 ---
 
@@ -268,42 +250,14 @@ Docker tells us:
 
 ---
 
-# Two useful flags for `docker ps`
-
-* To see only the last container that was started:
-
-    ```shell
-    $ docker ps -l
-    CONTAINER ID  IMAGE           ...  CREATED        STATUS        ...
-    068cc994ffd0  jpetazzo/clock  ...  2 minutes ago  Up 2 minutes  ...
-    ```
-
-* To see only the ID of containers:
-
-    ```shell
-    $ docker ps -q
-    068cc994ffd0
-    57ad9bdfc06b
-    47d677dcfba4
-    ```
-
-* Combine those flags to see only the ID of the last container started!
-
-    ```shell
-    $ docker ps -lq
-    068cc994ffd0
-    ```
-
----
-
 # View the logs of a container
 
 * We told you that Docker was logging the container output. Let's see that now.
 
     ```shell
-    $ docker logs $(docker ps -lq)
-    Sat Feb 25 14:55:46 UTC 2017
-    Sat Feb 25 14:55:47 UTC 2017
+    $ docker logs -f $(docker ps -lq)
+    Sat Feb 25 14:55:46 UTC 2022
+    Sat Feb 25 14:55:47 UTC 2022
     ...
     ```
 
@@ -311,46 +265,7 @@ Docker tells us:
 * You can, of course, specify the full ID.
 * The `logs` command will output the *entire* logs of the container.
   <br/>(Sometimes, that will be too much. Let's see how to address that.)
-
----
-
-# View only the tail of the logs
-
-* To avoid being spammed with eleventy pages of output,
-we can use the `--tail` option:
-
-    ```shell
-    $ docker logs --tail 10 $(docker ps -lq)
-    Sat Feb 25 14:57:46 UTC 2017
-    Sat Feb 25 14:57:47 UTC 2017
-    Sat Feb 25 14:57:48 UTC 2017
-    Sat Feb 25 14:57:49 UTC 2017
-    Sat Feb 25 14:57:50 UTC 2017
-    Sat Feb 25 14:57:51 UTC 2017
-    Sat Feb 25 14:57:52 UTC 2017
-    Sat Feb 25 14:57:53 UTC 2017
-    Sat Feb 25 14:57:54 UTC 2017
-    Sat Feb 25 14:57:55 UTC 2017
-    ```
-
-* The parameter is the number of lines that we want to see.
-
----
-
-# Follow the logs in real time
-
-* Just like with the standard UNIX command `tail -f`, we can
-follow the logs of our container:
-
-    ```shell
-    $ docker logs --tail 1 --follow $(docker ps -lq)
-    Sat Feb 25 14:57:46 UTC 2017
-    Sat Feb 25 14:57:47 UTC 2017
-    ^C
-    ```
-
-* This will display the last line in the log file.
-* Then, it will continue to display the logs in real time.
+* with flag `-f`, we can follow the logs of our container.
 * Use `^C` to exit.
 
 ---
@@ -371,146 +286,3 @@ sends `KILL.`
 
 Reminder: the `KILL` signal cannot be intercepted, and will
 forcibly terminate the container.
-
----
-
-# Stopping our containers
-
-* Let's stop one of those containers:
-
-    ```shell
-    $ docker stop $(docker ps -lq)
-    47d6
-    ```
-
-This will take 10 seconds:
-
-* Docker sends the TERM signal;
-* the container doesn't react to this signal
-  (it's a simple Shell script with no special
-  signal handling);
-* 10 seconds later, since the container is still
-  running, Docker sends the KILL signal;
-* this terminates the container.
-
----
-
-# Killing the remaining containers
-
-* Let's be less patient with the two other containers:
-
-    ```shell
-    $ docker kill $(docker ps -q)
-    13b94211a272
-    dc67beda1cea
-    ```
-
-The `stop` and `kill` commands can take multiple container IDs.
-
-Those containers will be terminated immediately (without
-the 10 seconds delay).
-
-* Let's check that our containers don't show up anymore:
-
-    ```shell
-    $ docker ps
-    CONTAINER ID  IMAGE           ...  CREATED        STATUS        ...
-    ```
-
----
-
-# List stopped containers
-
-* We can also see all containers, with the `-a` (`--all`) option.
-
-    ```shell
-    $ docker ps -a
-    CONTAINER ID  IMAGE           ...  STATUS
-    068cc994ffd0  jpetazzo/clock  ...  Exited (137) 3 min. ago
-    57ad9bdfc06b  jpetazzo/clock  ...  Exited (137) 3 min. ago
-    47d677dcfba4  jpetazzo/clock  ...  Exited (137) 3 min. ago
-    5c1dfd4d81f1  jpetazzo/clock  ...  Exited (0) 40 min. ago
-    ```
-
-* To cleanup the stopped containers, with the `-f` (`--filter`) option.
-
-    ```shell
-    #  We filter containers with status 'created' or 'exited'
-    $ docker rm $(docker ps -aq -f status=created -f status=exited)
-    ba14ef59aaad
-    d55fb08eab4c
-    9b423d1e6c35
-    ```
-
----
-
-# Background and foreground
-
-The distinction between foreground and background containers is arbitrary.
-
-From Docker's point of view, all containers are the same.
-
-All containers run the same way, whether there is a client attached to them or not.
-
-It is always possible to detach from a container, and to reattach to a container.
-
-Analogy: attaching to a container is like plugging a keyboard and screen to a physical server.
-
----
-
-# Detaching from a container
-
-* If you have started an *interactive* container (with option `-it`),
-  <br/>you can detach from it.
-* The "detach" sequence is `^P^Q`.
-* Otherwise you can detach by killing the Docker client.
-  <br/>(But not by hitting `^C`, as this would deliver `SIGINT`
-  to the container.)
-
-What does `-it` stand for?
-
-* `-t` means "allocate a terminal."
-* `-i` means "connect stdin to the terminal."
-
----
-
-# Detaching from non-interactive containers
-
-* **Warning:** if the container was started without `-it`...
-
-  * You won't be able to detach with `^P^Q`.
-  * If you hit `^C`, the signal will be proxied to the container.
-
-* Remember: you can always detach by killing the Docker client.
-
----
-
-# Checking container output
-
-* Use `docker attach` if you intend to send input to the container.
-* If you just want to see the output of a container, use `docker logs`.
-
-    ```shell
-    $ docker logs --tail 1 --follow <containerID>
-    ```
-
----
-
-# Restarting a container
-
-* When a container has exited, it is in stopped state. It can then be restarted with the `start` command.
-
-     ```shell
-     $ docker start <yourContainerID>
-     ```
-
-The container will be restarted using the same options you launched it
-with.
-
-* You can re-attach to it if you want to interact with it:
-
-    ```shell
-    $ docker attach <yourContainerID>
-    ```
-
-Use `docker ps -a` to identify the container ID of a previous `jpetazzo/clock` container and try those commands.
