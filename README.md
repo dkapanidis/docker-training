@@ -1,8 +1,6 @@
 # Docker Training
 
-Docker training from scratch up to real-app examples.
-
-Rendered PDF can be found [here](/docker-training.pdf).
+Docker training from scratch up to real-app examples ([PDF](/docker-training.pdf)).
 
 ## Quick Start
 
